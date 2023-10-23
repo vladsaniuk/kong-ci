@@ -73,6 +73,7 @@ services:
       - KONG_ADMIN_ERROR_LOG=/dev/stderr
       - KONG_ADMIN_LISTEN=0.0.0.0:8001
       - KONG_ADMIN_GUI_URL=http://localhost:8002
+      # - KONG_ADMIN_GUI_API_URL=http://localhost:8000/admin-api # Loop-back AdminAPI for Kong Manager to use on a same host and port
     deploy:
       restart_policy:
         condition: on-failure
