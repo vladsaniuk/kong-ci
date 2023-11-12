@@ -26,26 +26,29 @@ pipeline {
     }
 
     stages {
-        stage('Build image') {
-            when {
-                expression {
-                    BRANCH_NAME == 'main'
-                }
-            }
-            environment {
-                KONG_VERSION_SHORT = KONG_VERSION.replaceAll('[.]', '').substring(0,2)
-            }
-            steps {
-                script {
-                    if(KONG_VERSION >= '3') {
-                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb --output kong-enterprise-edition-${KONG_VERSION}.deb'
-                    } else {
-                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb --output kong-enterprise-edition-${KONG_VERSION}.deb'
-                    }
-                    sh 'docker build --tag vladsanyuk/kong:${APP_VERSION} --build-arg KONG_VERSION=${KONG_VERSION} .'
-                }
-            }
+        stage('echo') {
+            echo 'mock stage'
         }
+        // stage('Build image') {
+        //     when {
+        //         expression {
+        //             BRANCH_NAME == 'main'
+        //         }
+        //     }
+        //     environment {
+        //         KONG_VERSION_SHORT = KONG_VERSION.replaceAll('[.]', '').substring(0,2)
+        //     }
+        //     steps {
+        //         script {
+        //             if(KONG_VERSION >= '3') {
+        //                 sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb --output kong-enterprise-edition-${KONG_VERSION}.deb'
+        //             } else {
+        //                 sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb --output kong-enterprise-edition-${KONG_VERSION}.deb'
+        //             }
+        //             sh 'docker build --tag vladsanyuk/kong:${APP_VERSION} --build-arg KONG_VERSION=${KONG_VERSION} .'
+        //         }
+        //     }
+        // }
 
     //     stage('Scan image with Clair') {
     //         when {
@@ -130,7 +133,7 @@ pipeline {
                 }
                 echo 'Clean-up Clair DB image'
                 try {
-                    sh '${WORKSPACE}/clean_up_clair_db.sh'
+                    sh 'pwd && ls -l && ls -l ${WORKSPACE} && ${WORKSPACE}/clean_up_clair_db.sh'
                 } catch (err) {
                     echo "Failed: ${err}"
                     echo 'Most likely there is no need for clean-up'
