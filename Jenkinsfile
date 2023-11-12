@@ -27,7 +27,9 @@ pipeline {
 
     stages {
         stage('echo') {
-            echo 'mock stage'
+            steps {
+                echo 'mock stage'
+            }
         }
         // stage('Build image') {
         //     when {
