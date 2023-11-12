@@ -37,9 +37,9 @@ pipeline {
             steps {
                 script {
                     if(KONG_VERSION >= '3') {
-                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb --outputkong-enterprise-edition-${KONG_VERSION}.deb'
+                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb --output kong-enterprise-edition-${KONG_VERSION}.deb'
                     } else {
-                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb --outputkong-enterprise-edition-${KONG_VERSION}.deb'
+                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb --output kong-enterprise-edition-${KONG_VERSION}.deb'
                     }
                     sh 'docker build --tag vladsanyuk/kong:${APP_VERSION} --build-arg KONG_VERSION=${KONG_VERSION} .'
                 }
@@ -112,17 +112,40 @@ pipeline {
                 cleanWhenUnstable: true
             )
             script {
-                sh '''
-                echo Stop and remove Clair containers
-                docker stop clair-db clair
-                docker rm clair-db clair
-                echo Clean-up Clair DB image
-                ./clean_up_clair_db.sh
-                echo Clean-up dangling volumes
-                docker volume prune --force
-                echo Clean-up images
-                docker rmi vladsanyuk/kong:${APP_VERSION} arminc/clair-local-scan:latest
-                '''
+                // sh '''
+                // echo Stop and remove Clair containers
+                // docker stop clair-db clair
+                // docker rm clair-db clair
+                // echo Clean-up Clair DB image
+                // ./clean_up_clair_db.sh
+                // echo Clean-up dangling volumes
+                // docker volume prune --force
+                // echo Clean-up images
+                // docker rmi vladsanyuk/kong:${APP_VERSION} arminc/clair-local-scan:latest
+                // '''
+                echo 'Stop and remove Clair containers'
+                try {
+                    sh 'docker stop clair-db clair && docker rm clair-db clair'
+                } catch (err) {
+                    echo "Failed: ${err}"
+                    echo 'Most likely there is no need for clean-up'
+                }
+                echo 'Clean-up Clair DB image'
+                try {
+                    sh './clean_up_clair_db.sh'
+                } catch (err) {
+                    echo "Failed: ${err}"
+                    echo 'Most likely there is no need for clean-up'
+                }
+                echo 'Clean-up images'
+                try {
+                    sh 'docker rmi vladsanyuk/kong:${APP_VERSION} arminc/clair-local-scan:latest'
+                } catch (err) {
+                    echo "Failed: ${err}"
+                    echo 'Most likely there is no need for clean-up'
+                }
+                echo 'Clean-up dangling volumes'
+                sh 'docker volume prune --force'
             }
         }
     }
