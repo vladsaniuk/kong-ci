@@ -37,9 +37,9 @@ pipeline {
             steps {
                 script {
                     if(KONG_VERSION >= '3') {
-                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb -o kong-enterprise-edition-${KONG_VERSION}.deb'
+                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb --outputkong-enterprise-edition-${KONG_VERSION}.deb'
                     } else {
-                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb -o kong-enterprise-edition-${KONG_VERSION}.deb'
+                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb --outputkong-enterprise-edition-${KONG_VERSION}.deb'
                     }
                     sh 'docker build --tag vladsanyuk/kong:${APP_VERSION} --build-arg KONG_VERSION=${KONG_VERSION} .'
                 }
@@ -60,12 +60,12 @@ pipeline {
                     docker run -p 6060:6060 --link clair-db:postgres -d --name clair arminc/clair-local-scan:latest
                     sleep 5
                     DOCKER_GATEWAY=$(docker network inspect bridge | jq --raw-output '.[].IPAM.Config[].Gateway')
-                    curl https://github.com/arminc/clair-scanner/releases/download/v8/clair-scanner_linux_amd64 -o clair-scanner
+                    curl https://github.com/arminc/clair-scanner/releases/download/v8/clair-scanner_linux_amd64 --location --output clair-scanner
                     chmod +x clair-scanner
-                    ./clair-scanner --ip="$DOCKER_GATEWAY" --report="report-${APP_VERSION}.json" kong:${APP_VERSION} || echo Vulnerabilities found, please, refer to scan report
+                    ./clair-scanner --ip="$DOCKER_GATEWAY" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION} || echo Vulnerabilities found, please, refer to scan report
                     '''
                 }
-                archiveArtifacts (artifacts: 'report-*.json')
+                archiveArtifacts (artifacts: 'report-${APP_VERSION}.json')
             }
         }
 
@@ -116,10 +116,12 @@ pipeline {
                 echo Stop and remove Clair containers
                 docker stop clair-db clair
                 docker rm clair-db clair
+                echo Clean-up Clair DB image
+                ./clean_up_clair_db.sh
                 echo Clean-up dangling volumes
                 docker volume prune --force
                 echo Clean-up images
-                docker rmi vladsanyuk/kong:${APP_VERSION} arminc/clair-db:latest arminc/clair-local-scan:latest
+                docker rmi vladsanyuk/kong:${APP_VERSION} arminc/clair-local-scan:latest
                 '''
             }
         }
