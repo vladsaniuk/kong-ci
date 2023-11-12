@@ -106,17 +106,17 @@ pipeline {
                 cleanWhenSuccess: true,
                 cleanWhenUnstable: true
             )
-        }
-        script {
-            sh '''
-            echo Stop and remove Clair containers
-            docker stop clair-db clair
-            docker rm clair-db clair
-            echo Clean-up dangling volumes
-            docker volume prune --force
-            echo Clean-up images
-            docker rmi vladsanyuk/kong:${APP_VERSION} arminc/clair-db:latest arminc/clair-local-scan:latest
-            '''
+            script {
+                sh '''
+                echo Stop and remove Clair containers
+                docker stop clair-db clair
+                docker rm clair-db clair
+                echo Clean-up dangling volumes
+                docker volume prune --force
+                echo Clean-up images
+                docker rmi vladsanyuk/kong:${APP_VERSION} arminc/clair-db:latest arminc/clair-local-scan:latest
+                '''
+            }
         }
     }
 }
