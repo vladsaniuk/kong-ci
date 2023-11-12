@@ -109,9 +109,9 @@ pipeline {
                     echo "Failed: ${err}"
                     echo 'Most likely there is no need for clean-up'
                 }
+                // Clair DB container is very big to pull it each time, but it's updated daily
                 echo 'Clean-up Clair DB image'
                 try {
-                    // sh '${WORKSPACE}/clean_up_clair_db.sh'
                     sh './clean_up_clair_db.sh'
                 } catch (err) {
                     echo "Failed: ${err}"
@@ -126,6 +126,13 @@ pipeline {
                 }
                 echo 'Clean-up dangling volumes'
                 sh 'docker volume prune --force'
+                echo 'Remove Clair Docker network'
+                try {
+                    sh 'docker network rm scanning'
+                } else {
+                    echo "Failed: ${err}"
+                    echo 'Most likely network wasn\'t created'
+                }
             }
             cleanWs(
                 cleanWhenNotBuilt: false,

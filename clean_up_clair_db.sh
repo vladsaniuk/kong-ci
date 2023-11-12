@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 CREATED_TAG=$(echo $(docker images | grep clair-db) | cut -d ' ' -f 5)
-echo $CREATED_TAG
 if [[ $CREATED_TAG -eq "seconds" || $CREATED_TAG -eq "minutes" || $CREATED_TAG -eq "hours" ]]
 then
     echo "clair-db container created less than 1 day ago, no need for clean-up"
