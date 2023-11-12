@@ -106,14 +106,6 @@ pipeline {
     post {
         // Clean-up
         always {
-            cleanWs(
-                cleanWhenNotBuilt: false,
-                deleteDirs: true,
-                cleanWhenAborted: true,
-                cleanWhenFailure: true,
-                cleanWhenSuccess: true,
-                cleanWhenUnstable: true
-            )
             script {
                 // sh '''
                 // echo Stop and remove Clair containers
@@ -150,6 +142,14 @@ pipeline {
                 echo 'Clean-up dangling volumes'
                 sh 'docker volume prune --force'
             }
+            cleanWs(
+                cleanWhenNotBuilt: false,
+                deleteDirs: true,
+                cleanWhenAborted: true,
+                cleanWhenFailure: true,
+                cleanWhenSuccess: true,
+                cleanWhenUnstable: true
+            )
         }
     }
 }
