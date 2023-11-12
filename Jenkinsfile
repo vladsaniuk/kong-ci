@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 pipeline {
     agent any
     parameters {
@@ -62,10 +64,10 @@ pipeline {
                     DOCKER_GATEWAY=$(docker network inspect bridge | jq --raw-output '.[].IPAM.Config[].Gateway')
                     curl https://github.com/arminc/clair-scanner/releases/download/v8/clair-scanner_linux_amd64 -o clair-scanner
                     chmod +x clair-scanner
-                    ./clair-scanner --ip="$DOCKER_GATEWAY" --report="${APP_VERSION}" kong:${APP_VERSION} || exit 0
+                    ./clair-scanner --ip="$DOCKER_GATEWAY" --report="report-${APP_VERSION}" kong:${APP_VERSION} || echo Vulnerabilities found, please, refer to scan report
                     '''
                 }
-                archiveArtifacts (artifacts: '${APP_VERSION}.json')
+                archiveArtifacts (artifacts: 'report-*.json')
             }
         }
 
