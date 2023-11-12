@@ -9,10 +9,10 @@ pipeline {
         timeout(time: 30, unit: 'MINUTES')
         timestamps()
         buildDiscarder(logRotator(
-            artifactDaysToKeepStr: ("${BRANCH_NAME}" == 'master' && "${params.ENV}" == 'prod') ? '30' : '5',
-            artifactNumToKeepStr: ("${BRANCH_NAME}" == 'master' && "${params.ENV}" == 'prod') ? '10' : '2',
-            daysToKeepStr:  ("${BRANCH_NAME}" == 'master' && "${params.ENV}" == 'prod') ? '30' : '5',
-            numToKeepStr:  ("${BRANCH_NAME}" == 'master' && "${params.ENV}" == 'prod') ? '30' : '10',
+            artifactDaysToKeepStr: ("${BRANCH_NAME}" == 'main' && "${params.ENV}" == 'prod') ? '30' : '5',
+            artifactNumToKeepStr: ("${BRANCH_NAME}" == 'main' && "${params.ENV}" == 'prod') ? '10' : '2',
+            daysToKeepStr:  ("${BRANCH_NAME}" == 'main' && "${params.ENV}" == 'prod') ? '30' : '5',
+            numToKeepStr:  ("${BRANCH_NAME}" == 'main' && "${params.ENV}" == 'prod') ? '30' : '10',
             ))
     }
     environment {
@@ -26,7 +26,7 @@ pipeline {
         stage('Build image') {
             when {
                 expression {
-                    BRANCH_NAME == 'master'
+                    BRANCH_NAME == 'main'
                 }
             }
             steps {
@@ -44,7 +44,7 @@ pipeline {
         stage('Scan image with Clair') {
             when {
                 expression {
-                    BRANCH_NAME == 'master'
+                    BRANCH_NAME == 'main'
                 }
             }
             steps {
@@ -67,7 +67,7 @@ pipeline {
         stage('Login to registry') {
             when {
                 expression {
-                    BRANCH_NAME == 'master'
+                    BRANCH_NAME == 'main'
                 }
             }
             steps {
@@ -83,7 +83,7 @@ pipeline {
         stage('Push to registry') {
             when {
                 expression {
-                    BRANCH_NAME == 'master'
+                    BRANCH_NAME == 'main'
                 }
             }
             steps {
