@@ -26,98 +26,82 @@ pipeline {
     }
 
     stages {
-        stage('echo') {
+        stage('Build image') {
+            when {
+                expression {
+                    BRANCH_NAME == 'main'
+                }
+            }
+            environment {
+                KONG_VERSION_SHORT = KONG_VERSION.replaceAll('[.]', '').substring(0,2)
+            }
             steps {
-                echo 'mock stage'
+                script {
+                    if(KONG_VERSION >= '3') {
+                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb --output kong-enterprise-edition-${KONG_VERSION}.deb'
+                    } else {
+                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb --output kong-enterprise-edition-${KONG_VERSION}.deb'
+                    }
+                    sh 'docker build --tag vladsanyuk/kong:${APP_VERSION} --build-arg KONG_VERSION=${KONG_VERSION} .'
+                }
             }
         }
-        // stage('Build image') {
-        //     when {
-        //         expression {
-        //             BRANCH_NAME == 'main'
-        //         }
-        //     }
-        //     environment {
-        //         KONG_VERSION_SHORT = KONG_VERSION.replaceAll('[.]', '').substring(0,2)
-        //     }
-        //     steps {
-        //         script {
-        //             if(KONG_VERSION >= '3') {
-        //                 sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb --output kong-enterprise-edition-${KONG_VERSION}.deb'
-        //             } else {
-        //                 sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb --output kong-enterprise-edition-${KONG_VERSION}.deb'
-        //             }
-        //             sh 'docker build --tag vladsanyuk/kong:${APP_VERSION} --build-arg KONG_VERSION=${KONG_VERSION} .'
-        //         }
-        //     }
-        // }
 
-    //     stage('Scan image with Clair') {
-    //         when {
-    //             expression {
-    //                 BRANCH_NAME == 'main'
-    //             }
-    //         }
-    //         steps {
-    //             script {
-    //                 sh '''
-    //                 docker network create scanning
-    //                 docker run -p 5432:5432 -d --net=scanning --name db arminc/clair-db:latest
-    //                 docker run -p 6060:6060  --net=scanning --link db:postgres -d --name clair arminc/clair-local-scan:latest
-    //                 docker run --net=scanning --name=scanner --link=clair:clair -v '/var/run/docker.sock:/var/run/docker.sock'  objectiflibre/clair-scanner --clair="http://clair:6060" --ip="scanner" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION}
-    //                 docker container cp scanner:report-${APP_VERSION}.json ./report-${APP_VERSION}.json
-    //                 '''
-    //             }
-    //             archiveArtifacts (artifacts: 'report-*.json')
-    //         }
-    //     }
+        stage('Scan image with Clair') {
+            when {
+                expression {
+                    BRANCH_NAME == 'main'
+                }
+            }
+            steps {
+                script {
+                    sh '''
+                    docker network create scanning
+                    docker run -p 5432:5432 -d --net=scanning --name clair-db arminc/clair-db:latest
+                    docker run -p 6060:6060  --net=scanning --link clair-db:postgres -d --name clair arminc/clair-local-scan:latest
+                    docker run --net=scanning --name=scanner --link=clair:clair -v '/var/run/docker.sock:/var/run/docker.sock'  objectiflibre/clair-scanner --clair="http://clair:6060" --ip="scanner" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION}
+                    docker container cp scanner:report-${APP_VERSION}.json ./report-${APP_VERSION}.json
+                    '''
+                }
+                archiveArtifacts (artifacts: 'report-*.json')
+            }
+        }
 
-    //     stage('Login to registry') {
-    //         when {
-    //             expression {
-    //                 BRANCH_NAME == 'main'
-    //             }
-    //         }
-    //         steps {
-    //             script {
-    //                 echo 'Logging into Docker Hub'
-    //                 withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-    //                     sh 'echo $PASS | docker login -u $USER --password-stdin'
-    //                 }
-    //             }
-    //         }
-    //     }
+        stage('Login to registry') {
+            when {
+                expression {
+                    BRANCH_NAME == 'main'
+                }
+            }
+            steps {
+                script {
+                    echo 'Logging into Docker Hub'
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                        sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    }
+                }
+            }
+        }
 
-    //     stage('Push to registry') {
-    //         when {
-    //             expression {
-    //                 BRANCH_NAME == 'main'
-    //             }
-    //         }
-    //         steps {
-    //             script {
-    //                 echo 'Pushing image to registry'
-    //                 sh 'docker push vladsanyuk/kong:${APP_VERSION}'
-    //             }
-    //         }
-    //     }
+        stage('Push to registry') {
+            when {
+                expression {
+                    BRANCH_NAME == 'main'
+                }
+            }
+            steps {
+                script {
+                    echo 'Pushing image to registry'
+                    sh 'docker push vladsanyuk/kong:${APP_VERSION}'
+                }
+            }
+        }
     }
 
     post {
         // Clean-up
         always {
             script {
-                // sh '''
-                // echo Stop and remove Clair containers
-                // docker stop clair-db clair
-                // docker rm clair-db clair
-                // echo Clean-up Clair DB image
-                // ./clean_up_clair_db.sh
-                // echo Clean-up dangling volumes
-                // docker volume prune --force
-                // echo Clean-up images
-                // docker rmi vladsanyuk/kong:${APP_VERSION} arminc/clair-local-scan:latest
-                // '''
                 echo 'Stop and remove Clair containers'
                 try {
                     sh 'docker stop scanner clair-db clair && docker rm scanner clair-db clair'
@@ -127,7 +111,8 @@ pipeline {
                 }
                 echo 'Clean-up Clair DB image'
                 try {
-                    sh 'pwd && ls -l && ls -l ${WORKSPACE} && ${WORKSPACE}/clean_up_clair_db.sh'
+                    // sh '${WORKSPACE}/clean_up_clair_db.sh'
+                    sh './clean_up_clair_db.sh'
                 } catch (err) {
                     echo "Failed: ${err}"
                     echo 'Most likely there is no need for clean-up'
