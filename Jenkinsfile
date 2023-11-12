@@ -29,9 +29,11 @@ pipeline {
                     BRANCH_NAME == 'main'
                 }
             }
+            environment {
+                KONG_VERSION_SHORT = KONG_VERSION.replaceAll('[.]', '').substring(0,2)
+            }
             steps {
                 script {
-                    KONG_VERSION_SHORT = KONG_VERSION.replaceAll('[.]', '').substring(0,2)
                     if(KONG_VERSION >= '3') {
                         // sh 'curl https://packages.konghq.com/public/gateway-$(echo ${KONG_VERSION} | tr -d '.' | cut -c 1-2})/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb -o kong-enterprise-edition-${KONG_VERSION}.deb'
                         sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb -o kong-enterprise-edition-${KONG_VERSION}.deb'
