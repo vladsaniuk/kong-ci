@@ -59,7 +59,7 @@ pipeline {
                     docker network create scanning
                     docker run -p 5432:5432 -d --net=scanning --name clair-db arminc/clair-db:latest
                     docker run -p 6060:6060  --net=scanning --link clair-db:postgres -d --name clair arminc/clair-local-scan:latest
-                    docker run --net=scanning --name=scanner --link=clair:clair -v '/var/run/docker.sock:/var/run/docker.sock'  objectiflibre/clair-scanner:latest --clair="http://clair:6060" --ip="scanner" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION}
+                    docker run --net=scanning --name=scanner --link=clair:clair -v '/var/run/docker.sock:/var/run/docker.sock' objectiflibre/clair-scanner:latest --clair="http://clair:6060" --ip="scanner" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION}
                     docker container cp scanner:report-${APP_VERSION}.json ./report-${APP_VERSION}.json
                     '''
                 }
