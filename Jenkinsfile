@@ -54,16 +54,23 @@ pipeline {
             }
             steps {
                 script {
+                    // sh '''
+                    // docker run -d --name clair-db arminc/clair-db:latest
+                    // sleep 15
+                    // docker run -p 6060:6060 --link clair-db:postgres -d --name clair arminc/clair-local-scan:latest
+                    // sleep 5
+                    // # DOCKER_GATEWAY=$(docker network inspect bridge | jq --raw-output '.[].IPAM.Config[].Gateway')
+                    // # HOST_IP=$(ifconfig eth0 | grep -Po 'inet \\K[\\d]{1,3}.[\\d]{1,3}.[\\d]{1,3}.[\\d]{1,3}')
+                    // curl https://github.com/arminc/clair-scanner/releases/download/v8/clair-scanner_linux_amd64 --location --output clair-scanner
+                    // chmod +x clair-scanner
+                    // ./clair-scanner --ip="172.17.0.1" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION} || echo Vulnerabilities found, please, refer to scan report
+                    // '''
                     sh '''
-                    docker run -d --name clair-db arminc/clair-db:latest
-                    sleep 15
-                    docker run -p 6060:6060 --link clair-db:postgres -d --name clair arminc/clair-local-scan:latest
-                    sleep 5
-                    # DOCKER_GATEWAY=$(docker network inspect bridge | jq --raw-output '.[].IPAM.Config[].Gateway')
-                     HOST_IP=$(ifconfig eth0 | grep -Po 'inet \\K[\\d]{1,3}.[\\d]{1,3}.[\\d]{1,3}.[\\d]{1,3}')
-                    curl https://github.com/arminc/clair-scanner/releases/download/v8/clair-scanner_linux_amd64 --location --output clair-scanner
-                    chmod +x clair-scanner
-                    ./clair-scanner --ip="172.17.0.1" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION} || echo Vulnerabilities found, please, refer to scan report
+                    docker network create scanning
+                    docker run -p 5432:5432 -d --net=scanning --name db arminc/clair-db:latest
+                    docker run -p 6060:6060  --net=scanning --link db:postgres -d --name clair arminc/clair-local-scan:latest
+                    docker run --net=scanning --name=scanner --link=clair:clair -v '/var/run/docker.sock:/var/run/docker.sock'  objectiflibre/clair-scanner --clair="http://clair:6060" --ip="scanner" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION}
+                    docker container cp scanner:report-${APP_VERSION}.json ./report-${APP_VERSION}.json
                     '''
                 }
                 archiveArtifacts (artifacts: 'report-*.json')
@@ -126,7 +133,7 @@ pipeline {
                 // '''
                 echo 'Stop and remove Clair containers'
                 try {
-                    sh 'docker stop clair-db clair && docker rm clair-db clair'
+                    sh 'docker stop scanner clair-db clair && docker rm scanner clair-db clair'
                 } catch (err) {
                     echo "Failed: ${err}"
                     echo 'Most likely there is no need for clean-up'
@@ -140,7 +147,7 @@ pipeline {
                 }
                 echo 'Clean-up images'
                 try {
-                    sh 'docker rmi vladsanyuk/kong:${APP_VERSION} arminc/clair-local-scan:latest'
+                    sh 'docker rmi vladsanyuk/kong:${APP_VERSION} arminc/clair-local-scan:latest objectiflibre/clair-scanner'
                 } catch (err) {
                     echo "Failed: ${err}"
                     echo 'Most likely there is no need for clean-up'
