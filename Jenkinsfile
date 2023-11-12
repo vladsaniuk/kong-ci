@@ -60,10 +60,10 @@ pipeline {
                     docker run -p 6060:6060 --link clair-db:postgres -d --name clair arminc/clair-local-scan:latest
                     sleep 5
                     # DOCKER_GATEWAY=$(docker network inspect bridge | jq --raw-output '.[].IPAM.Config[].Gateway')
-                    HOST_IP=$(ifconfig eth0 | grep -Po 'inet \\K[\\d]{1,3}.[\\d]{1,3}.[\\d]{1,3}.[\\d]{1,3}')
+                     HOST_IP=$(ifconfig eth0 | grep -Po 'inet \\K[\\d]{1,3}.[\\d]{1,3}.[\\d]{1,3}.[\\d]{1,3}')
                     curl https://github.com/arminc/clair-scanner/releases/download/v8/clair-scanner_linux_amd64 --location --output clair-scanner
                     chmod +x clair-scanner
-                    ./clair-scanner --ip="$HOST_IP" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION} || echo Vulnerabilities found, please, refer to scan report
+                    ./clair-scanner --ip="172.17.0.1" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION} || echo Vulnerabilities found, please, refer to scan report
                     '''
                 }
                 archiveArtifacts (artifacts: 'report-*.json')
