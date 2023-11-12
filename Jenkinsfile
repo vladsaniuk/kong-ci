@@ -129,7 +129,7 @@ pipeline {
                 echo 'Remove Clair Docker network'
                 try {
                     sh 'docker network rm scanning'
-                } else {
+                } catch (err) {
                     echo "Failed: ${err}"
                     echo 'Most likely network wasn\'t created'
                 }
