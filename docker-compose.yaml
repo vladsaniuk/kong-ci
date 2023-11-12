@@ -19,7 +19,7 @@ services:
     build:
       context: .
       args:
-        - VERSION=${VERSION}
+        - KONG_VERSION=${KONG_VERSION}
     environment:
       - KONG_DATABASE=postgres
       - KONG_PG_HOST=kong-database
@@ -36,7 +36,7 @@ services:
     build:
       context: .
       args:
-        - VERSION=${VERSION}
+        - KONG_VERSION=${KONG_VERSION}
         - RUN_MIGRATIONS=${RUN_MIGRATIONS}
     environment:
       - KONG_DATABASE=postgres
@@ -54,7 +54,7 @@ services:
     build:
       context: .
       args:
-        - VERSION=${VERSION}
+        - KONG_VERSION=${KONG_VERSION}
     ports:
       - 8000:8000 # Proxy
       - 8443:8443
@@ -71,9 +71,14 @@ services:
       - KONG_ADMIN_ACCESS_LOG=/dev/stdout
       - KONG_PROXY_ERROR_LOG=/dev/stderr
       - KONG_ADMIN_ERROR_LOG=/dev/stderr
-      - KONG_ADMIN_LISTEN=0.0.0.0:8001
-      - KONG_ADMIN_GUI_URL=http://localhost:8002
-      # - KONG_ADMIN_GUI_API_URL=http://localhost:8000/admin-api # Loop-back AdminAPI for Kong Manager to use on a same host and port
+      - KONG_ADMIN_LISTEN=0.0.0.0:8001 reuseport backlog=16384, 0.0.0.0:8444 http2 ssl reuseport backlog=16384
+      - KONG_SSL_PROTOCOLS="TLSv1.2 TLSv1.3"
+      - KONG_SSL_CERT=/opt/certs/kong.crt
+      - KONG_SSL_CERT_KEY=/opt/certs/kong.key
+      - KONG_ADMIN_GUI_SSL_CERT=/opt/certs/kong.crt
+      - KONG_ADMIN_GUI_SSL_CERT_KEY=/opt/certs/kong.key
+      - KONG_ADMIN_GUI_URL=https://localhost:8445
+      - KONG_ADMIN_GUI_API_URL=https://localhost:8444
     deploy:
       restart_policy:
         condition: on-failure

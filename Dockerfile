@@ -2,9 +2,10 @@
 
 FROM --platform=amd64 ubuntu:22.04
 
-ARG VERSION
+ARG KONG_VERSION
 
-COPY --chown=kong:kong kong-enterprise-edition-${VERSION}.amd64.deb /tmp/kong.deb
+COPY --chown=kong:kong kong-enterprise-edition-${KONG_VERSION}.deb /tmp/kong.deb
+COPY --chown=kong:kong opt/certs/kong.crt opt/certs/kong.key /opt/certs/
 
 RUN set -ex; \
     apt-get update \
@@ -14,6 +15,7 @@ RUN set -ex; \
     && rm -rf /tmp/kong.deb \
     && chown kong:0 /usr/local/bin/kong \
     && chown -R kong:0 /usr/local/kong \
+    && chown -R kong:0 /opt/certs/ \
     && ln -s /usr/local/openresty/luajit/bin/luajit /usr/local/bin/luajit \
     && ln -s /usr/local/openresty/luajit/bin/luajit /usr/local/bin/lua \
     && ln -s /usr/local/openresty/nginx/sbin/nginx /usr/local/bin/nginx \
