@@ -3,7 +3,7 @@ pipeline {
     parameters {
         choice(name: 'ENV', choices: ['dev', 'prod'], description: 'Env name')
         string(name: 'REGION', defaultValue: 'us-east-1', description: 'AWS region')
-        choice(name: 'KONG_VERSION', choices: ['2.8.4.4', '3.4.1.1'], description: 'Kong LTS version')
+        choice(name: 'KONG_VERSION', choices: ['3.4.1.1', '2.8.4.4'], description: 'Kong LTS version')
     }
     options {
         timeout(time: 30, unit: 'MINUTES')
@@ -31,10 +31,13 @@ pipeline {
             }
             steps {
                 script {
+                    KONG_VERSION_SHORT = KONG_VERSION.replaceAll('[.]', '').substring(0,2)
                     if(KONG_VERSION >= '3') {
-                        sh 'curl https://packages.konghq.com/public/gateway-$(echo ${KONG_VERSION} | tr -d '.' | cut -c 1-2})/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb -o kong-enterprise-edition-${KONG_VERSION}.deb'
+                        // sh 'curl https://packages.konghq.com/public/gateway-$(echo ${KONG_VERSION} | tr -d '.' | cut -c 1-2})/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb -o kong-enterprise-edition-${KONG_VERSION}.deb'
+                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb -o kong-enterprise-edition-${KONG_VERSION}.deb'
                     } else {
-                        sh 'curl https://packages.konghq.com/public/gateway-$(echo ${KONG_VERSION} | tr -d '.' | cut -c 1-2})/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb -o kong-enterprise-edition-${KONG_VERSION}.deb'
+                        // sh 'curl https://packages.konghq.com/public/gateway-$(echo ${KONG_VERSION} | tr -d '.' | cut -c 1-2})/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb -o kong-enterprise-edition-${KONG_VERSION}.deb'
+                        sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb -o kong-enterprise-edition-${KONG_VERSION}.deb'
                     }
                     sh 'docker build --tag kong:${APP_VERSION} --build-arg KONG_VERSION=${KONG_VERSION}'
                 }
