@@ -16,6 +16,7 @@ pipeline {
             daysToKeepStr:  ("${BRANCH_NAME}" == 'main' && "${params.ENV}" == 'prod') ? '30' : '5',
             numToKeepStr:  ("${BRANCH_NAME}" == 'main' && "${params.ENV}" == 'prod') ? '30' : '10',
             ))
+        ansiColor('xterm')
     }
     environment {
         TIMESTAMP = sh(script: 'date +%s',returnStdout: true).trim()
@@ -46,67 +47,56 @@ pipeline {
             }
         }
 
-        stage('Scan image with Clair') {
-            when {
-                expression {
-                    BRANCH_NAME == 'main'
-                }
-            }
-            steps {
-                script {
-                    // sh '''
-                    // docker run -d --name clair-db arminc/clair-db:latest
-                    // sleep 15
-                    // docker run -p 6060:6060 --link clair-db:postgres -d --name clair arminc/clair-local-scan:latest
-                    // sleep 5
-                    // # DOCKER_GATEWAY=$(docker network inspect bridge | jq --raw-output '.[].IPAM.Config[].Gateway')
-                    // # HOST_IP=$(ifconfig eth0 | grep -Po 'inet \\K[\\d]{1,3}.[\\d]{1,3}.[\\d]{1,3}.[\\d]{1,3}')
-                    // curl https://github.com/arminc/clair-scanner/releases/download/v8/clair-scanner_linux_amd64 --location --output clair-scanner
-                    // chmod +x clair-scanner
-                    // ./clair-scanner --ip="172.17.0.1" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION} || echo Vulnerabilities found, please, refer to scan report
-                    // '''
-                    sh '''
-                    docker network create scanning
-                    docker run -p 5432:5432 -d --net=scanning --name db arminc/clair-db:latest
-                    docker run -p 6060:6060  --net=scanning --link db:postgres -d --name clair arminc/clair-local-scan:latest
-                    docker run --net=scanning --name=scanner --link=clair:clair -v '/var/run/docker.sock:/var/run/docker.sock'  objectiflibre/clair-scanner --clair="http://clair:6060" --ip="scanner" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION}
-                    docker container cp scanner:report-${APP_VERSION}.json ./report-${APP_VERSION}.json
-                    '''
-                }
-                archiveArtifacts (artifacts: 'report-*.json')
-            }
-        }
+    //     stage('Scan image with Clair') {
+    //         when {
+    //             expression {
+    //                 BRANCH_NAME == 'main'
+    //             }
+    //         }
+    //         steps {
+    //             script {
+    //                 sh '''
+    //                 docker network create scanning
+    //                 docker run -p 5432:5432 -d --net=scanning --name db arminc/clair-db:latest
+    //                 docker run -p 6060:6060  --net=scanning --link db:postgres -d --name clair arminc/clair-local-scan:latest
+    //                 docker run --net=scanning --name=scanner --link=clair:clair -v '/var/run/docker.sock:/var/run/docker.sock'  objectiflibre/clair-scanner --clair="http://clair:6060" --ip="scanner" --report="report-${APP_VERSION}.json" vladsanyuk/kong:${APP_VERSION}
+    //                 docker container cp scanner:report-${APP_VERSION}.json ./report-${APP_VERSION}.json
+    //                 '''
+    //             }
+    //             archiveArtifacts (artifacts: 'report-*.json')
+    //         }
+    //     }
 
-        stage('Login to registry') {
-            when {
-                expression {
-                    BRANCH_NAME == 'main'
-                }
-            }
-            steps {
-                script {
-                    echo 'Logging into Docker Hub'
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                        sh 'echo $PASS | docker login -u $USER --password-stdin'
-                    }
-                }
-            }
-        }
+    //     stage('Login to registry') {
+    //         when {
+    //             expression {
+    //                 BRANCH_NAME == 'main'
+    //             }
+    //         }
+    //         steps {
+    //             script {
+    //                 echo 'Logging into Docker Hub'
+    //                 withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+    //                     sh 'echo $PASS | docker login -u $USER --password-stdin'
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        stage('Push to registry') {
-            when {
-                expression {
-                    BRANCH_NAME == 'main'
-                }
-            }
-            steps {
-                script {
-                    echo 'Pushing image to registry'
-                    sh 'docker push vladsanyuk/kong:${APP_VERSION}'
-                }
-            }
-        }
-    }
+    //     stage('Push to registry') {
+    //         when {
+    //             expression {
+    //                 BRANCH_NAME == 'main'
+    //             }
+    //         }
+    //         steps {
+    //             script {
+    //                 echo 'Pushing image to registry'
+    //                 sh 'docker push vladsanyuk/kong:${APP_VERSION}'
+    //             }
+    //         }
+    //     }
+    // }
 
     post {
         // Clean-up
@@ -140,7 +130,7 @@ pipeline {
                 }
                 echo 'Clean-up Clair DB image'
                 try {
-                    sh './clean_up_clair_db.sh'
+                    sh '${WORKSPACE}/clean_up_clair_db.sh'
                 } catch (err) {
                     echo "Failed: ${err}"
                     echo 'Most likely there is no need for clean-up'
