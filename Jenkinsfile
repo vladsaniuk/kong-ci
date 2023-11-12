@@ -43,7 +43,7 @@ pipeline {
                         // sh 'curl https://packages.konghq.com/public/gateway-$(echo ${KONG_VERSION} | tr -d '.' | cut -c 1-2})/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb -o kong-enterprise-edition-${KONG_VERSION}.deb'
                         sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_all.deb -o kong-enterprise-edition-${KONG_VERSION}.deb'
                     }
-                    sh 'docker build --tag kong:${APP_VERSION} --build-arg KONG_VERSION=${KONG_VERSION} .'
+                    sh 'docker build --tag vladsanyuk/kong:${APP_VERSION} --build-arg KONG_VERSION=${KONG_VERSION} .'
                 }
             }
         }
