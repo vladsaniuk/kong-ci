@@ -25,6 +25,9 @@ services:
       - KONG_PG_HOST=kong-database
       - KONG_PG_USER=kong
       - KONG_PG_PASSWORD=kongpass
+      - KONG_LOG_LEVEL=${KONG_LOG_LEVEL:-info}
+      - KONG_PLUGINS=bundled,easter_egg
+      - KONG_LUA_PACKAGE_PATH=/usr/local/bin/easter_egg/?.lua;;
     command: kong migrations bootstrap
     deploy:
       restart_policy:
@@ -43,7 +46,10 @@ services:
       - KONG_PG_HOST=kong-database
       - KONG_PG_USER=kong
       - KONG_PG_PASSWORD=kongpass
-    command: kong migrations up && kong migrations finish
+      - KONG_LOG_LEVEL=${KONG_LOG_LEVEL:-info}
+      - KONG_PLUGINS=bundled,easter_egg
+      - KONG_LUA_PACKAGE_PATH=/usr/local/bin/easter_egg/?.lua;;
+    command: sh -c "sleep 10 && kong migrations up && kong migrations finish"
     deploy:
       restart_policy:
         condition: on-failure
@@ -79,6 +85,9 @@ services:
       - KONG_ADMIN_GUI_SSL_CERT_KEY=/opt/certs/kong.key
       - KONG_ADMIN_GUI_URL=https://localhost:8445
       - KONG_ADMIN_GUI_API_URL=https://localhost:8444
+      - KONG_LOG_LEVEL=${KONG_LOG_LEVEL:-info}
+      - KONG_PLUGINS=bundled,easter_egg
+      - KONG_LUA_PACKAGE_PATH=/usr/local/bin/easter_egg/?.lua;;
     deploy:
       restart_policy:
         condition: on-failure
