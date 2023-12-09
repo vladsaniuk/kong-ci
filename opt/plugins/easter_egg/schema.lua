@@ -17,10 +17,10 @@ return {
           -- a standard defined field (typedef), with some customizations
           { request_header = typedefs.header_name {
               required = true,
-              default = "Request-Easter-Egg-Header" } },
+              default = "request-easter-egg-header" } },
           { response_header = typedefs.header_name {
               required = true,
-              default = "Response-Easter-Egg-Header" } },
+              default = "response-easter-egg-header" } },
           { write_to_db = {
               type = "boolean",
               default = false } },

@@ -27,9 +27,6 @@ COPY docker-entrypoint.sh kong-docker-entrypoint.sh /
    
 USER kong
 
-ENV KONG_LUA_PACKAGE_PATH=/usr/local/share/lua/5.1/kong/plugins/?.lua;;
-ENV KONG_PLUGINS=bundled,easter_egg
-
 ENTRYPOINT ["/docker-entrypoint.sh"]
    
 EXPOSE 8000 8443 8001 8444 8002 8445 8003 8446 8004 8447
