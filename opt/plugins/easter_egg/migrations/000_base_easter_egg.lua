@@ -2,9 +2,9 @@ return {
   postgres = {
     up = [[
       CREATE TABLE IF NOT EXISTS "easter_egg_table" (
-        "id"           UUID                         PRIMARY KEY,
+        "id"           UUID,
         "created_at"   TIMESTAMP WITHOUT TIME ZONE,
-        "user"         TEXT,
+        "user"         TEXT,                          PRIMARY KEY,
         "token"        TEXT
       );
 

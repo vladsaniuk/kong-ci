@@ -7,7 +7,7 @@ return {
   {
     name                  = "easter_egg_table", -- the actual table in the database
     endpoint_key          = "token",
-    primary_key           = { "id" },
+    primary_key           = { "user" },
     cache_key             = { "token" },
     generate_admin_api    = true,
     fields = {
@@ -18,13 +18,13 @@ return {
       { created_at = typedefs.auto_timestamp_s, },
       { user = {
           type      = "string",
-          required  = true
+          required  = true,
+          unique    = true,
         }, },
       { token = {
           type      = "string",
           required  = false,
           unique    = true,
-          auto      = true,
         },
       },
     },
