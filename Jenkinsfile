@@ -34,6 +34,10 @@ pipeline {
                     args '-v ./opt/plugins:/tmp'
                 }
             }
+
+            steps {
+                echo "Docker stage"
+            }
         }
 
         stage('Build image') {
