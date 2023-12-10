@@ -30,7 +30,6 @@ pipeline {
             agent {
                 dockerfile {
                     dir 'luacheck'
-                    label 'alpine-luacheck'
                     args '-v ./opt/plugins:/tmp'
                 }
             }
