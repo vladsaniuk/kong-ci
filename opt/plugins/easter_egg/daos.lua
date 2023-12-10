@@ -6,9 +6,10 @@ local typedefs = require "kong.db.schema.typedefs"
 return {
   {
     name                  = "easter_egg_table", -- the actual table in the database
+    ttl                   = true,
     endpoint_key          = "token",
     primary_key           = { "user" },
-    cache_key             = { "token" },
+    cache_key             = { "user" },
     generate_admin_api    = true,
     fields = {
         -- a value to be inserted by the DAO itself
