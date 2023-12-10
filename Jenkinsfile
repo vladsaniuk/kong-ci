@@ -26,6 +26,16 @@ pipeline {
     }
 
     stages {
+        stage('Scan custom plugin source code with Luacheck') {
+            agent {
+                dockerfile {
+                    dir 'luacheck'
+                    label 'alpine-luacheck'
+                    args '-v ./opt/plugins:/tmp'
+                }
+            }
+        }
+
         stage('Build image') {
             when {
                 expression {
