@@ -25,6 +25,22 @@ pipeline {
     }
 
     stages {
+        stage('Login to registry') {
+            when {
+                expression {
+                    BRANCH_NAME == 'main'
+                }
+            }
+            steps {
+                script {
+                    echo 'Logging into Docker Hub'
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                        sh 'echo ${PASS} | docker login -u ${USER} --password-stdin'
+                    }
+                }
+            }
+        }
+
         stage('Scan custom plugin source code with Luacheck') {
             steps {
                 script {
@@ -87,22 +103,6 @@ pipeline {
                     '''
                 }
                 archiveArtifacts (artifacts: 'report-*.json')
-            }
-        }
-
-        stage('Login to registry') {
-            when {
-                expression {
-                    BRANCH_NAME == 'main'
-                }
-            }
-            steps {
-                script {
-                    echo 'Logging into Docker Hub'
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                        sh 'echo ${PASS} | docker login -u ${USER} --password-stdin'
-                    }
-                }
             }
         }
 
