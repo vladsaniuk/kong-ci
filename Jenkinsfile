@@ -141,8 +141,8 @@ pipeline {
                     echo 'Try to remove containers by name'
                     try {
                         sh 'docker rm scanner clair-db clair luacheck'
-                    } catch (err) {
-                        echo "Failed: ${err}"
+                    } catch (err_remove_by_name) {
+                        echo "Failed: ${err_remove_by_name}"
                         echo 'Most likely there is no need for clean-up'
                     }
                 }
