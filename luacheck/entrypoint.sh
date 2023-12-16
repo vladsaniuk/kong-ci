@@ -13,7 +13,7 @@ set -x
 for plugin in "${WORKSPACE}"/opt/plugins/*
 do
     # if [ "$plugin" = "/tmp/*" ]
-    if [ "$plugin" = "/var/jenkins_home/workspace/Kong_CI_main/opt/plugins/*" ]
+    if [ "$plugin" = "${WORKSPACE}/opt/plugins/*" ]
     then
         echo "No folders in /tmp, probably plugins folder wasn't mounted"
         exit 1
