@@ -33,7 +33,7 @@ pipeline {
                     withEnv(["WORKSPACE=${WORKSPACE}"]) {
                         sh '''
                         docker build --tag alpine-luacheck:latest luacheck
-                        docker run --volumes-from jenkins alpine-luacheck:latest
+                        docker run --volumes-from jenkins --env WORKSPACE=${WORKSPACE} alpine-luacheck:latest
                         '''
                     }
                 }

@@ -2,13 +2,13 @@
 set -x
 printenv
 echo "${WORKSPACE}"
-ls -l
-ls -l /var
-ls -l /var/jenkins_home
-ls -l /var/jenkins_home/workspace
-ls -l /var/jenkins_home/workspace/Kong_CI_main
-ls -l /var/jenkins_home/workspace/Kong_CI_main/opt
-ls -l /var/jenkins_home/workspace/Kong_CI_main/opt/plugins/
+# ls -l
+# ls -l /var
+# ls -l /var/jenkins_home
+# ls -l /var/jenkins_home/workspace
+# ls -l /var/jenkins_home/workspace/Kong_CI_main
+# ls -l /var/jenkins_home/workspace/Kong_CI_main/opt
+# ls -l /var/jenkins_home/workspace/Kong_CI_main/opt/plugins/
 ls -l "${WORKSPACE}"
 # ls -l /tmp/
 # for plugin in /tmp/*
