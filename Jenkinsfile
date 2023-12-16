@@ -30,12 +30,16 @@ pipeline {
             steps {
                 script {
                     echo WORKSPACE
-                    withEnv(["WORKSPACE=${WORKSPACE}"]) {
-                        sh '''
-                        docker build --tag alpine-luacheck:latest luacheck
-                        docker run --volumes-from jenkins --env WORKSPACE=${WORKSPACE} alpine-luacheck:latest
-                        '''
-                    }
+                    // withEnv(["WORKSPACE=${WORKSPACE}"]) {
+                    //     sh '''
+                    //     docker build --tag alpine-luacheck:latest luacheck
+                    //     docker run --volumes-from jenkins --env WORKSPACE=${WORKSPACE} alpine-luacheck:latest
+                    //     '''
+                    // }
+                    sh '''
+                    docker build --tag alpine-luacheck:latest luacheck
+                    docker run --volumes-from jenkins --env WORKSPACE=${WORKSPACE} alpine-luacheck:latest
+                    '''
                 }
             }
         }
