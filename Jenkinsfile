@@ -27,15 +27,13 @@ pipeline {
 
     stages {
         stage('Scan custom plugin source code with Luacheck') {
-            agent {
-                dockerfile {
-                    dir 'luacheck'
-                    args '-v ./opt/plugins:/tmp'
-                }
-            }
-
             steps {
-                echo "Docker stage"
+                script {
+                    sh '''
+                    docker build --tag alpine-luacheck:latest luacheck
+                    docker run -v ./opt/plugins:/tmp alpine-luacheck:latest
+                    '''
+                }
             }
         }
 
