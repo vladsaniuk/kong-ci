@@ -55,18 +55,18 @@ function easter_egg:access(config)
             local cached_user = kong.cache:get(cache_key, { resurrect_ttl = 0.001 }, get_user, header_value)
 
             local token
-            
+
             if cached_user then
                 token = cached_user.token
                 kong.log.debug(header_value .. " user found in cache, use cached token")
             end
-            
+
             if not cached_user then
-                local user_in_db, err = kong.db.easter_egg_table:select({
+                local user_in_db, err_select = kong.db.easter_egg_table:select({
                     user = header_value
                 })
-                
-                if err then
+
+                if err_select then
                     kong.log.err("Error when selecting user from DB: " .. err)
                     return kong.response.error(err_500.status, err_500.message)
                 end
@@ -75,16 +75,16 @@ function easter_egg:access(config)
                     kong.log.debug(header_value .. " user doesn't exist, create user")
                     local generated_token = generate_token()
 
-                    local user_add, err = kong.db.easter_egg_table:insert({
+                    local user_add, err_add = kong.db.easter_egg_table:insert({
                         user = header_value,
                         token = generated_token
                     })
-                    
-                    if err then
+
+                    if err_add then
                         kong.log.err("Error when inserting user to DB: " .. err)
                         return kong.response.error(err_500.status, err_500.message)
                     end
-                    
+
                     if not user_add then
                         kong.log.err("Failed to insert user to DB")
                         return kong.response.error(err_500.status, err_500.message)
