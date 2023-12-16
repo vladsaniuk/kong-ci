@@ -29,10 +29,12 @@ pipeline {
         stage('Scan custom plugin source code with Luacheck') {
             steps {
                 script {
-                    sh '''
-                    docker build --tag alpine-luacheck:latest luacheck
-                    docker run --volumes-from jenkins alpine-luacheck:latest
-                    '''
+                    withEnv(["WORKSPACE=${WORKSPACE}"]) {
+                        sh '''
+                        docker build --tag alpine-luacheck:latest luacheck
+                        docker run --volumes-from jenkins alpine-luacheck:latest
+                        '''
+                    }
                 }
             }
         }
