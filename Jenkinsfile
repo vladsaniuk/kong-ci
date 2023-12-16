@@ -2,11 +2,11 @@
 
 pipeline {
     agent any
+
     parameters {
-        choice(name: 'ENV', choices: ['dev', 'prod'], description: 'Env name')
-        string(name: 'REGION', defaultValue: 'us-east-1', description: 'AWS region')
         choice(name: 'KONG_VERSION', choices: ['3.4.1.1', '2.8.4.4'], description: 'Kong LTS version')
     }
+
     options {
         timeout(time: 30, unit: 'MINUTES')
         timestamps()
@@ -18,11 +18,10 @@ pipeline {
             ))
         ansiColor('xterm')
     }
+
     environment {
         TIMESTAMP = sh(script: 'date +%s',returnStdout: true).trim()
         APP_VERSION = "${KONG_VERSION}-${TIMESTAMP}-${BUILD_ID}"
-        AWS_ACCESS_KEY_ID = credentials('aws_access_key_id')
-        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
     }
 
     stages {
@@ -173,7 +172,7 @@ pipeline {
 
                 echo 'Clean-up dangling images'
                 sh 'docker image prune --force'
-                
+
                 echo 'Remove Clair Docker network'
                 try {
                     sh 'docker network rm scanning'
