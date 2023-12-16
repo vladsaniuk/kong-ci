@@ -1,5 +1,6 @@
 #!/bin/sh
 set -x
+printenv
 echo "${WORKSPACE}"
 ls -l
 ls -l /var

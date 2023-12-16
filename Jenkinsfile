@@ -29,6 +29,7 @@ pipeline {
         stage('Scan custom plugin source code with Luacheck') {
             steps {
                 script {
+                    echo WORKSPACE
                     withEnv(["WORKSPACE=${WORKSPACE}"]) {
                         sh '''
                         docker build --tag alpine-luacheck:latest luacheck
