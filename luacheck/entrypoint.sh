@@ -1,7 +1,7 @@
 #!/bin/sh
-set -x
-printenv
-echo "${WORKSPACE}"
+# set -x
+# printenv
+# echo "${WORKSPACE}"
 # ls -l
 # ls -l /var
 # ls -l /var/jenkins_home
@@ -9,7 +9,7 @@ echo "${WORKSPACE}"
 # ls -l /var/jenkins_home/workspace/Kong_CI_main
 # ls -l /var/jenkins_home/workspace/Kong_CI_main/opt
 # ls -l /var/jenkins_home/workspace/Kong_CI_main/opt/plugins/
-ls -l "${WORKSPACE}"
+# ls -l "${WORKSPACE}"
 # ls -l /tmp/
 # for plugin in /tmp/*
 # for plugin in /var/jenkins_home/workspace/Kong_CI_main/opt/plugins/*
