@@ -128,7 +128,7 @@ pipeline {
             script {
                 echo 'Stop Clair containers'
                 try {
-                    sh 'docker stop scanner clair-db clair && docker rm scanner clair-db clair luacheck'
+                    sh 'docker stop scanner clair-db clair'
                 } catch (err) {
                     echo "Failed: ${err}"
                     echo 'Most likely there is no need for clean-up'
@@ -138,7 +138,13 @@ pipeline {
                     sh 'docker rm $(docker ps --all --format {{.ID}} --filter status=exited)'
                 } catch (err) {
                     echo "Failed: ${err}"
-                    echo 'Most likely there is no need for clean-up'
+                    echo 'Try to remove containers by name'
+                    try {
+                        sh 'docker rm scanner clair-db clair luacheck'
+                    } catch (err) {
+                        echo "Failed: ${err}"
+                        echo 'Most likely there is no need for clean-up'
+                    }
                 }
                 // Clair DB container is very big to pull it each time, but it's updated daily, so
                 // check if container was created more than 1 day ago, if yes - clean it up
