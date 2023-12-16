@@ -11,10 +11,10 @@ pipeline {
         timeout(time: 30, unit: 'MINUTES')
         timestamps()
         buildDiscarder(logRotator(
-            artifactDaysToKeepStr: ("${BRANCH_NAME}" == 'main' && "${params.ENV}" == 'prod') ? '30' : '5',
-            artifactNumToKeepStr: ("${BRANCH_NAME}" == 'main' && "${params.ENV}" == 'prod') ? '10' : '2',
-            daysToKeepStr:  ("${BRANCH_NAME}" == 'main' && "${params.ENV}" == 'prod') ? '30' : '5',
-            numToKeepStr:  ("${BRANCH_NAME}" == 'main' && "${params.ENV}" == 'prod') ? '30' : '10',
+            artifactDaysToKeepStr: ("${BRANCH_NAME}" == 'main') ? '30' : '5',
+            artifactNumToKeepStr: ("${BRANCH_NAME}" == 'main') ? '10' : '2',
+            daysToKeepStr:  ("${BRANCH_NAME}" == 'main') ? '30' : '5',
+            numToKeepStr:  ("${BRANCH_NAME}" == 'main') ? '30' : '10',
             ))
         ansiColor('xterm')
     }
