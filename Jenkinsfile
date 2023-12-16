@@ -29,13 +29,6 @@ pipeline {
         stage('Scan custom plugin source code with Luacheck') {
             steps {
                 script {
-                    // echo WORKSPACE
-                    // withEnv(["WORKSPACE=${WORKSPACE}"]) {
-                    //     sh '''
-                    //     docker build --tag alpine-luacheck:latest luacheck
-                    //     docker run --volumes-from jenkins --env WORKSPACE=${WORKSPACE} alpine-luacheck:latest
-                    //     '''
-                    // }
                     sh '''
                     docker build --tag alpine-luacheck:latest luacheck
                     docker run --volumes-from jenkins --env WORKSPACE=${WORKSPACE} --name luacheck alpine-luacheck:latest
@@ -147,6 +140,8 @@ pipeline {
                 }
                 echo 'Clean-up dangling volumes'
                 sh 'docker volume prune --force'
+                echo 'Clean-up dangling images'
+                sh 'docker image prune --force'
                 echo 'Remove Clair Docker network'
                 try {
                     sh 'docker network rm scanning'
