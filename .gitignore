@@ -1,0 +1,3 @@
+.vscode
+kong-docker-entrypoint.sh
+kong-enterprise-edition-*.deb
