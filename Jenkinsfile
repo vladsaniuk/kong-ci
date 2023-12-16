@@ -69,6 +69,13 @@ pipeline {
             steps {
                 script {
                     // For Clair we're mounting Docker sock from the Jenkins host, so we use --volume, not --volumes-from
+                    echo 'Ensure Clair Docker network doesn\'t exist'
+                    try {
+                        sh 'docker network rm scanning'
+                    } catch (err) {
+                        echo "Failed: ${err}"
+                        echo 'Clair Docker network doesn\'t exist'
+                    }
                     sh '''
                     docker network create scanning
                     docker run --publish 5432:5432 --net=scanning --detach --name clair-db arminc/clair-db:latest
