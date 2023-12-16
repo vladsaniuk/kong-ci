@@ -1,12 +1,14 @@
 #!/bin/sh
 set -x
-# ls -l
-# ls -l /var
-# ls -l /var/jenkins_home
-# ls -l /var/jenkins_home/workspace
-# ls -l /var/jenkins_home/workspace/Kong_CI_main
-# ls -l /var/jenkins_home/workspace/Kong_CI_main/opt
-# ls -l /var/jenkins_home/workspace/Kong_CI_main/opt/plugins/
+echo "${WORKSPACE}"
+ls -l
+ls -l /var
+ls -l /var/jenkins_home
+ls -l /var/jenkins_home/workspace
+ls -l /var/jenkins_home/workspace/Kong_CI_main
+ls -l /var/jenkins_home/workspace/Kong_CI_main/opt
+ls -l /var/jenkins_home/workspace/Kong_CI_main/opt/plugins/
+ls -l "${WORKSPACE}"
 # ls -l /tmp/
 # for plugin in /tmp/*
 # for plugin in /var/jenkins_home/workspace/Kong_CI_main/opt/plugins/*
