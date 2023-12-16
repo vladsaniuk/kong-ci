@@ -1,5 +1,6 @@
 #!/bin/sh
-
+ls -l
+ls -l /tmp/
 for plugin in /tmp/*
 do
     if [ "$plugin" = "/tmp/*" ]
