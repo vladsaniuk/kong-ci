@@ -29,6 +29,8 @@ pipeline {
         stage('Scan custom plugin source code with Luacheck') {
             steps {
                 script {
+                    // We're running Jenkins in container, so using Docker agens is tricky
+                    // instead we use Docker besides Docker directly mounting Jenkins volume into luacheck container
                     sh '''
                     docker build --tag alpine-luacheck:latest luacheck
                     docker run --volumes-from jenkins --env WORKSPACE=${WORKSPACE} --name luacheck alpine-luacheck:latest
@@ -66,6 +68,7 @@ pipeline {
             }
             steps {
                 script {
+                    // For Clair we're mounting Docker sock from the Jenkins host, so we use --volume, not --volumes-from
                     sh '''
                     docker network create scanning
                     docker run -p 5432:5432 -d --net=scanning --name clair-db arminc/clair-db:latest
@@ -121,7 +124,12 @@ pipeline {
                     echo 'Most likely there is no need for clean-up'
                 }
                 echo 'Remove all exited containers'
-                sh 'docker rm $(docker ps --all --format {{.ID}} --filter status=exited)'
+                try {
+                    sh 'docker rm $(docker ps --all --format {{.ID}} --filter status=exited)'
+                } catch (err) {
+                    echo "Failed: ${err}"
+                    echo 'Most likely there is no need for clean-up'
+                }
                 // Clair DB container is very big to pull it each time, but it's updated daily, so
                 // check if container was created more than 1 day ago, if yes - clean it up
                 echo 'Clean-up Clair DB image'
