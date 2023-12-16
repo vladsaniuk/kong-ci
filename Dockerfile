@@ -23,7 +23,7 @@ RUN apt-get update \
     && ln -s /usr/local/openresty/nginx/sbin/nginx /usr/local/bin/nginx \
     && kong version 
    
-COPY docker-entrypoint.sh kong-docker-entrypoint.sh /
+COPY --chmod=755 docker-entrypoint.sh kong-docker-entrypoint.sh /
    
 USER kong
 

@@ -50,6 +50,9 @@ pipeline {
             }
             steps {
                 script {
+                    echo 'Get Kong docker-entrypoint.sh'
+                    sh 'curl https://raw.githubusercontent.com/Kong/docker-kong/master/docker-entrypoint.sh -o kong-docker-entrypoint.sh'
+                    echo 'Get Kong deb package'
                     if(KONG_VERSION >= '3') {
                         sh 'curl https://packages.konghq.com/public/gateway-${KONG_VERSION_SHORT}/deb/ubuntu/pool/jammy/main/k/ko/kong-enterprise-edition_${KONG_VERSION}/kong-enterprise-edition_${KONG_VERSION}_amd64.deb --output kong-enterprise-edition-${KONG_VERSION}.deb'
                     } else {
