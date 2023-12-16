@@ -133,19 +133,23 @@ pipeline {
                     echo "Failed: ${err}"
                     echo 'Most likely there is no need for clean-up'
                 }
+
                 echo 'Remove all exited containers'
                 try {
                     sh 'docker rm $(docker ps --all --format {{.ID}} --filter status=exited)'
                 } catch (err) {
                     echo "Failed: ${err}"
-                    echo 'Try to remove containers by name'
-                    try {
-                        sh 'docker rm scanner clair-db clair luacheck'
-                    } catch (err_remove_by_name) {
-                        echo "Failed: ${err_remove_by_name}"
-                        echo 'Most likely there is no need for clean-up'
-                    }
+                    echo 'Most likely there is no need for clean-up'
                 }
+
+                echo "Remove containers by name"
+                try {
+                    sh 'docker rm scanner clair-db clair luacheck'
+                } catch (err) {
+                    echo "Failed: ${err}"
+                    echo 'Most likely there is no need for clean-up'
+                }
+
                 // Clair DB container is very big to pull it each time, but it's updated daily, so
                 // check if container was created more than 1 day ago, if yes - clean it up
                 echo 'Clean-up Clair DB image'
@@ -155,6 +159,7 @@ pipeline {
                     echo "Failed: ${err}"
                     echo 'Most likely there is no need for clean-up'
                 }
+
                 echo 'Clean-up images'
                 try {
                     sh 'docker rmi vladsanyuk/kong:${APP_VERSION} arminc/clair-local-scan:latest objectiflibre/clair-scanner:latest alpine-luacheck:latest'
@@ -162,10 +167,13 @@ pipeline {
                     echo "Failed: ${err}"
                     echo 'Most likely there is no need for clean-up'
                 }
+
                 echo 'Clean-up dangling volumes'
                 sh 'docker volume prune --force'
+
                 echo 'Clean-up dangling images'
                 sh 'docker image prune --force'
+                
                 echo 'Remove Clair Docker network'
                 try {
                     sh 'docker network rm scanning'
