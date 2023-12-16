@@ -31,6 +31,7 @@ pipeline {
                     BRANCH_NAME == 'main'
                 }
             }
+
             steps {
                 script {
                     echo 'Logging into Docker Hub'
@@ -60,9 +61,11 @@ pipeline {
                     BRANCH_NAME == 'main'
                 }
             }
+
             environment {
                 KONG_VERSION_SHORT = KONG_VERSION.replaceAll('[.]', '').substring(0,2)
             }
+
             steps {
                 script {
                     echo 'Get Kong docker-entrypoint.sh'
@@ -84,6 +87,7 @@ pipeline {
                     BRANCH_NAME == 'main'
                 }
             }
+
             steps {
                 script {
                     // For Clair we're mounting Docker sock from the Jenkins host, so we use --volume, not --volumes-from
@@ -112,6 +116,7 @@ pipeline {
                     BRANCH_NAME == 'main'
                 }
             }
+            
             steps {
                 script {
                     echo 'Pushing image to registry'
