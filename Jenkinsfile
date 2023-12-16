@@ -31,7 +31,7 @@ pipeline {
                 script {
                     sh '''
                     docker build --tag alpine-luacheck:latest luacheck
-                    docker run --volume "${WORKSPACE}/opt/plugins:/tmp/" alpine-luacheck:latest
+                    docker run --volumes-from jenkins alpine-luacheck:latest
                     '''
                 }
             }
