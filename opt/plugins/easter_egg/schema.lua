@@ -13,7 +13,7 @@ return {
       config = {
         type = "record",
         fields = {
-          -- Describe your plugin's configuration's schema here.   
+          -- Describe your plugin's configuration's schema here.
           -- a standard defined field (typedef), with some customizations
           { request_header = typedefs.header_name {
               required = true,

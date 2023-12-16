@@ -67,7 +67,7 @@ function easter_egg:access(config)
                 })
 
                 if err_select then
-                    kong.log.err("Error when selecting user from DB: " .. err)
+                    kong.log.err("Error when selecting user from DB: " .. err_select)
                     return kong.response.error(err_500.status, err_500.message)
                 end
 
@@ -81,7 +81,7 @@ function easter_egg:access(config)
                     })
 
                     if err_add then
-                        kong.log.err("Error when inserting user to DB: " .. err)
+                        kong.log.err("Error when inserting user to DB: " .. err_add)
                         return kong.response.error(err_500.status, err_500.message)
                     end
 
