@@ -1,9 +1,19 @@
 #!/bin/sh
-ls -l
-ls -l /tmp/
-for plugin in /tmp/*
+set -x
+# ls -l
+# ls -l /var
+# ls -l /var/jenkins_home
+# ls -l /var/jenkins_home/workspace
+# ls -l /var/jenkins_home/workspace/Kong_CI_main
+# ls -l /var/jenkins_home/workspace/Kong_CI_main/opt
+# ls -l /var/jenkins_home/workspace/Kong_CI_main/opt/plugins/
+# ls -l /tmp/
+# for plugin in /tmp/*
+# for plugin in /var/jenkins_home/workspace/Kong_CI_main/opt/plugins/*
+for plugin in "${WORKSPACE}"/opt/plugins/*
 do
-    if [ "$plugin" = "/tmp/*" ]
+    # if [ "$plugin" = "/tmp/*" ]
+    if [ "$plugin" = "/var/jenkins_home/workspace/Kong_CI_main/opt/plugins/*" ]
     then
         echo "No folders in /tmp, probably plugins folder wasn't mounted"
         exit 1
